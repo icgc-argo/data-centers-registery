@@ -1,2 +1,2 @@
-# data-centers-registery
-Discovery and registery service for RDPCs (regional data processing center) and RDDCs (regional data distribution center)
+# data-centers-registry
+Discovery and registry service for RDPCs (regional data processing center) and RDDCs (regional data distribution center)
