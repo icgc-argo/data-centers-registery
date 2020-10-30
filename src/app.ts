@@ -45,6 +45,7 @@ const App = (config: AppConfig): express.Express => {
   app.use(bodyParser.json());
 
   app.get('/', (req, res) => res.status(200).send('Data Centers Registry'));
+
   app.get('/health', (req, res) => {
     const status = dbHealth.status == Status.OK ? 200 : 500;
     const resBody = {
@@ -59,18 +60,18 @@ const App = (config: AppConfig): express.Express => {
   const authHandler = authFilter([config.auth.WRITE_SCOPE]);
 
   app.get(
-    '/data-centers/:id',
+    '/data-centers/:centerId',
     wrapAsync(async (req: Request, res: Response) => {
-      const result = await svc.byId(req.params.id);
+      const result = await svc.byId(req.params.centerId);
       return res.status(200).send(result);
     }),
   );
 
   app.post(
-    '/data-centers/properties/search',
+    '/data-centers/search',
     wrapAsync(async (req: Request, res: Response) => {
       const query = req.body;
-      const result = await svc.searchByPropertiesQuery(query);
+      const result = await svc.advSearchByQuery(query);
       return res.status(200).send(result);
     }),
   );
@@ -81,8 +82,10 @@ const App = (config: AppConfig): express.Express => {
       const filters: svc.QueryFilters = {
         country: (req.query.country as string)?.split(',') || [],
         name: (req.query.name as string)?.split(',') || [],
+        centerId: (req.query.centerId as string)?.split(',') || [],
+        type: (req.query.type as string)?.split(',') || [],
       };
-      const result = await svc.getFiles(filters);
+      const result = await svc.getMany(filters);
       return res.status(200).send(result);
     }),
   );
@@ -98,7 +101,7 @@ const App = (config: AppConfig): express.Express => {
   );
 
   app.put(
-    '/data-centers/:id',
+    '/data-centers',
     authHandler,
     wrapAsync(async (req: Request, res: Response) => {
       const dc = req.body;
@@ -108,10 +111,10 @@ const App = (config: AppConfig): express.Express => {
   );
 
   app.delete(
-    '/data-centers/:id',
+    '/data-centers/:centerId',
     authHandler,
     wrapAsync(async (req: Request, res: Response) => {
-      await svc.deleteDc(req.params.id);
+      await svc.deleteDc(req.params.centerId);
       return res.status(204).send();
     }),
   );

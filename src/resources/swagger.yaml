@@ -39,30 +39,26 @@ paths:
               schema:
                 type: object
 
-  '/data-centers/properties/search':
+  '/data-centers/search':
     post:
       tags:
         - Read
-      summary: get all data centers, filtered by the query parameters if provided
+      summary: get all data centers, filtered by the query (mongo filters syntax) if provided
       requestBody:
         content:
           application/json:
             schema:
               type: object
-              properties:
-                $or:
-                  type: array
-                  items:
-                    type: object
               example:
                 $or:
-                  - capabalities:
+                  - 'properties.capabilities':
                       $in:
                         - nextflow
-                    capacity:
-                      - XXL
-                      - XL
-                  - pricePerHour:
+                    'properties.capacity':
+                      $in:
+                        - XXL
+                        - XL
+                  - 'properties.pricePerHour':
                       $lte: 1.99
       responses:
         '404':
@@ -101,8 +97,15 @@ paths:
           schema:
             type: string
             format: csv
-        - name: properties
-          description: list of file properties to match (any of)
+        - name: type
+          description: list of data center types to match (any of)
+          in: query
+          required: false
+          schema:
+            type: string
+            format: csv
+        - name: centerId
+          description: list of data center ids to match (any of)
           in: query
           required: false
           schema:
@@ -110,7 +113,8 @@ paths:
             format: csv
       tags:
         - Read
-      summary: get all data centers, filtered by the query parameters if provided
+      summary: get all data centers, filtered by the query parameters
+      description: returns what matches ALL the different parameters (intersection), if provided, or empty array if nothign does.
       responses:
         '404':
           description: Requested resource not found
@@ -157,18 +161,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataCenter'
-  '/data-centers/{id}':
-    parameters:
-      - name: id
-        description: id of the DataCenter to get
-        in: path
-        required: true
-        schema:
-          type: string
     put:
       tags:
         - Write
-      summary: update DataCenter
+      summary: update a DataCenter
       requestBody:
         content:
           application/json:
@@ -191,6 +187,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataCenter'
+  '/data-centers/{centerId}':
+    parameters:
+      - name: centerId
+        description: id of the DataCenter to get
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Read
@@ -268,6 +272,8 @@ components:
         country:
           type: string
         name:
+          type: string
+        type:
           type: string
         properties:
           type: object
