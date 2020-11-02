@@ -265,7 +265,8 @@ components:
           vendor: openstack
           capcity: XL
           region: NA
-          k8s: []
+          k8s: true
+          cores: 1500
       properties:
         centerId:
           type: string
