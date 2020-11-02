@@ -1,0 +1,280 @@
+# /*
+#  * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+#  *
+#  * This program and the accompanying materials are made available under the terms of
+#  * the GNU Affero General Public License v3.0. You should have received a copy of the
+#  * GNU Affero General Public License along with this program.
+#  *  If not, see <http://www.gnu.org/licenses/>.
+#  *
+#  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+#  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+#  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+#  * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+#  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+#  * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+#  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+#  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#  */
+
+openapi: 3.0.0
+info:
+  title: DataCenters Service
+  version: 0.1.0
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: get status of app and various app components
+      responses:
+        '500':
+          description: 'app is not fully healthy'
+        '200':
+          description: 'all components reporting healthy status'
+          content:
+            application/json:
+              schema:
+                type: object
+
+  '/data-centers/search':
+    post:
+      tags:
+        - Read
+      summary: get all data centers, filtered by the query (mongo filters syntax) if provided
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                $or:
+                  - 'properties.capabilities':
+                      $in:
+                        - nextflow
+                    'properties.capacity':
+                      $in:
+                        - XXL
+                        - XL
+                  - 'properties.pricePerHour':
+                      $lte: 1.99
+      responses:
+        '404':
+          description: Requested resource not found
+        '400':
+          description: Invalid parameters or body request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '200':
+          description: DataCenter objects matching the query or empty array if nothing matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataCenter'
+
+  '/data-centers':
+    get:
+      parameters:
+        - name: country
+          description: list of countries to match (any of)
+          in: query
+          required: false
+          schema:
+            type: string
+            format: csv
+        - name: name
+          description: list of names to match (any of)
+          in: query
+          required: false
+          schema:
+            type: string
+            format: csv
+        - name: type
+          description: list of data center types to match (any of)
+          in: query
+          required: false
+          schema:
+            type: string
+            format: csv
+        - name: centerId
+          description: list of data center ids to match (any of)
+          in: query
+          required: false
+          schema:
+            type: string
+            format: csv
+      tags:
+        - Read
+      summary: get all data centers, filtered by the query parameters
+      description: returns what matches ALL the different parameters (intersection), if provided, or empty array if nothign does.
+      responses:
+        '404':
+          description: Requested resource not found
+        '400':
+          description: Invalid parameters or body request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '200':
+          description: DataCenter objects matching the query or empty array if nothing matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataCenter'
+    post:
+      tags:
+        - Write
+      summary: create a DataCenter
+      description: creates a DataCenter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataCenter'
+      responses:
+        '404':
+          description: Requested resource not found
+        '400':
+          description: Invalid parameters or body request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '200':
+          description: 'the DataCenter that was created or found already.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataCenter'
+    put:
+      tags:
+        - Write
+      summary: update a DataCenter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataCenter'
+      responses:
+        '404':
+          description: Requested resource not found
+        '400':
+          description: Invalid parameters or body request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '200':
+          description: DataCenter object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataCenter'
+  '/data-centers/{centerId}':
+    parameters:
+      - name: centerId
+        description: id of the DataCenter to get
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Read
+      summary: get DataCenter by Id
+      responses:
+        '404':
+          description: Requested resource not found
+        '400':
+          description: Invalid parameters or body request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '200':
+          description: DataCenter object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataCenter'
+    delete:
+      tags:
+        - Write
+      summary: delete DataCenter by Id
+      responses:
+        '404':
+          description: Requested resource not found
+        '400':
+          description: Invalid parameters or body request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '201':
+          description: DataCenter deleted
+components:
+  responses:
+    ServiceUnavailableError:
+      description: Endpoint service unavailable
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    ServerError:
+      description: Server error
+    ForbiddenError:
+      description: Access token has incorrect scopes
+    NotFoundError:
+      description: Requested resource was not found
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    DataCenter:
+      type: object
+      example:
+        centerId: collab
+        country: CA
+        name: Cancer Collaboratory Cloud
+        properties:
+          capabilities:
+            - workflows
+            - nextflow
+          storage: S3
+          vendor: openstack
+          capcity: XL
+          region: NA
+          k8s: true
+          cores: 1500
+      properties:
+        centerId:
+          type: string
+        country:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        properties:
+          type: object
