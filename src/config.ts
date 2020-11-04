@@ -93,7 +93,7 @@ const buildAppContext = async (secrets: any): Promise<AppConfig> => {
       enabled: process.env.AUTH_ENABLED !== 'false',
       jwtKeyUrl: process.env.JWT_KEY_URL || '',
       jwtKey: process.env.JWT_KEY || '',
-      WRITE_SCOPE: process.env.WRITE_SCOPE || 'SERVICE.WRITE',
+      WRITE_SCOPE: process.env.WRITE_SCOPE || 'DC-REGISTRY.WRITE',
     },
   };
   return config;
