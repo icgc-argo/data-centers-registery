@@ -39,47 +39,6 @@ paths:
               schema:
                 type: object
 
-  '/data-centers/search':
-    post:
-      tags:
-        - Read
-      summary: get all data centers, filtered by the query (mongo filters syntax) if provided
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                $or:
-                  - 'properties.capabilities':
-                      $in:
-                        - nextflow
-                    'properties.capacity':
-                      $in:
-                        - XXL
-                        - XL
-                  - 'properties.pricePerHour':
-                      $lte: 1.99
-      responses:
-        '404':
-          description: Requested resource not found
-        '400':
-          description: Invalid parameters or body request
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-        '500':
-          $ref: '#/components/responses/ServerError'
-        '200':
-          description: DataCenter objects matching the query or empty array if nothing matches
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DataCenter'
-
   '/data-centers':
     get:
       parameters:
@@ -187,6 +146,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataCenter'
+
   '/data-centers/{centerId}':
     parameters:
       - name: centerId
@@ -231,8 +191,9 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
         '500':
           $ref: '#/components/responses/ServerError'
-        '201':
+        '204':
           description: DataCenter deleted
+
 components:
   responses:
     ServiceUnavailableError:
@@ -256,25 +217,26 @@ components:
       example:
         centerId: collab
         country: CA
+        type: RDPC
+        contactEmail: joe.smith@example.com
+        organization: Acme
+        storageType: S3
         name: Cancer Collaboratory Cloud
-        properties:
-          capabilities:
-            - workflows
-            - nextflow
-          storage: S3
-          vendor: openstack
-          capcity: XL
-          region: NA
-          k8s: true
-          cores: 1500
+        url: https://api.example.com
       properties:
+        contactEmail:
+          type: string
+        storageType:
+          type: string
+        url:
+          type: string
         centerId:
           type: string
         country:
+          type: string
+        organization:
           type: string
         name:
           type: string
         type:
           type: string
-        properties:
-          type: object

@@ -9,8 +9,11 @@ export interface DataCenter {
   country: string;
   name: string;
   type: string;
+  organization: string;
   centerId: string;
-  properties: Properties;
+  storageType: string;
+  contactEmail: string;
+  url: string;
 }
 
 export type QueryFilters = {
@@ -69,7 +72,10 @@ export async function update(newDc: DataCenter) {
   dc.country = newDc.country;
   dc.name = newDc.name;
   dc.type = newDc.type;
-  dc.properties = newDc.properties;
+  dc.contactEmail = newDc.contactEmail;
+  dc.storageType = newDc.storageType;
+  dc.organization = newDc.organization;
+  dc.url = newDc.url;
   const updated = await dc.save();
   return docToPojo(updated);
 }
@@ -78,47 +84,36 @@ function validateDataCenter(dc: DataCenter) {
   if (!dc.centerId) {
     throw new Errors.InvalidArgument('centerId is missing');
   }
+
   if (!dc.country) {
     throw new Errors.InvalidArgument('country is missing');
   }
+
   if (!dc.name) {
     throw new Errors.InvalidArgument('name is missing');
   }
+
   if (!dc.type) {
     throw new Errors.InvalidArgument('type is missing');
   }
-  validateProperties(dc.properties);
-}
 
-function validateProperties(properties: Properties) {
-  if (!properties) {
-    return true;
+  if (!dc.organization) {
+    throw new Errors.InvalidArgument('organization is missing');
   }
 
-  const valid = _.every(Object.keys(properties), (k: string) => {
-    console.log(`property ${k} type =${typeof properties[k]}`);
-    if (typeof properties[k] == 'boolean') {
-      return true;
-    }
-    if (typeof properties[k] == 'number') {
-      return true;
-    }
-    if (typeof properties[k] == 'string') {
-      return true;
-    }
-    if (_.isArray(properties[k])) {
-      const validArray = _.every(properties[k] as Array<any>, v => typeof v == 'string');
-      console.log(`valid array: ${validArray}`);
-      return validArray;
-    }
-    return false;
-  });
-  if (!valid) {
-    throw new Errors.InvalidArgument(
-      'Properties can only be string, string[], number or boolean, and cannot be nested further',
-    );
+  if (!dc.storageType) {
+    throw new Errors.InvalidArgument('storageType is missing');
+  }
+
+  if (!dc.url) {
+    throw new Errors.InvalidArgument('url is missing');
+  }
+
+  if (!dc.contactEmail) {
+    throw new Errors.InvalidArgument('contactEmail is missing');
   }
 }
+
 async function findById(id: string) {
   const center = await DataCenterModel.findOne({ centerId: id });
   return center;
@@ -149,7 +144,11 @@ const DataCenterSchema = new mongoose.Schema(
     centerId: { type: String, index: true, unique: true, required: true },
     country: { type: String, required: true },
     name: { type: String, required: true },
-    properties: { type: {} },
+    type: { type: String, required: true },
+    organization: { type: String, required: true },
+    storageType: { type: String, required: true },
+    url: { type: String, required: true },
+    contactEmail: { type: String, required: true },
   },
   { timestamps: true, minimize: false, optimisticConcurrency: true } as any,
 );
@@ -184,7 +183,10 @@ function docToPojo(center: DataCenterDocument): DataCenter {
     centerId: center.centerId,
     country: center.country,
     name: center.name,
-    properties: center.properties,
+    organization: center.organization,
+    contactEmail: center.contactEmail,
+    storageType: center.storageType,
+    url: center.url,
     type: center.type,
   };
 }
