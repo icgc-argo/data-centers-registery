@@ -27,6 +27,7 @@ import Auth from '@overture-stack/ego-token-middleware';
 import log from './logger';
 import logger from './logger';
 import * as svc from './service';
+import { Errors } from './service';
 console.log('in App.ts');
 const App = (config: AppConfig): express.Express => {
   // Auth middleware
@@ -146,7 +147,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     return next(err);
   }
   let status: number;
-  const customizableMsg = err.message;
+  let customizableMsg = err.message;
 
   switch (true) {
     case err.name == 'Unauthorized':
@@ -154,6 +155,21 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       break;
     case err.name == 'Forbidden':
       status = 403;
+      break;
+    case err instanceof Errors.InvalidArgument:
+      status = 400;
+      break;
+    case err instanceof Errors.NotFound:
+      err.name = 'Not found';
+      status = 404;
+      break;
+    case err instanceof Errors.StateConflict:
+      status = 409;
+      break;
+    case (err as any).name == 'CastError':
+      status = 404;
+      err.name = 'Not found';
+      customizableMsg = 'Id not found';
       break;
     default:
       status = 500;

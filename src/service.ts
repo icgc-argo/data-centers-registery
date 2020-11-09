@@ -39,7 +39,7 @@ export async function getMany(filters: QueryFilters): Promise<DataCenter[]> {
 export async function byId(id: string): Promise<DataCenter> {
   const center = await findById(id);
   if (center == undefined) {
-    throw new Errors.NotFound('');
+    throw new Errors.NotFound('No record found for this id');
   }
   return docToPojo(center);
 }
