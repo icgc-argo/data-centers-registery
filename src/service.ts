@@ -1,4 +1,21 @@
-import { Mongoose } from 'mongoose';
+/*
+ * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ *
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 import mongoose from 'mongoose';
 import _ from 'lodash';
@@ -13,7 +30,8 @@ export interface DataCenter {
   centerId: string;
   storageType: string;
   contactEmail: string;
-  url: string;
+  songUrl: string;
+  scoreUrl: string;
 }
 
 export type QueryFilters = {
@@ -75,7 +93,8 @@ export async function update(newDc: DataCenter) {
   dc.contactEmail = newDc.contactEmail;
   dc.storageType = newDc.storageType;
   dc.organization = newDc.organization;
-  dc.url = newDc.url;
+  dc.songUrl = newDc.songUrl;
+  dc.scoreUrl = newDc.scoreUrl;
   const updated = await dc.save();
   return docToPojo(updated);
 }
@@ -105,8 +124,11 @@ function validateDataCenter(dc: DataCenter) {
     throw new Errors.InvalidArgument('storageType is missing');
   }
 
-  if (!dc.url) {
-    throw new Errors.InvalidArgument('url is missing');
+  if (!dc.songUrl) {
+    throw new Errors.InvalidArgument('songUrl is missing');
+  }
+  if (!dc.scoreUrl) {
+    throw new Errors.InvalidArgument('scoreUrl is missing');
   }
 
   if (!dc.contactEmail) {
@@ -147,7 +169,8 @@ const DataCenterSchema = new mongoose.Schema(
     type: { type: String, required: true },
     organization: { type: String, required: true },
     storageType: { type: String, required: true },
-    url: { type: String, required: true },
+    songUrl: { type: String, required: true },
+    scoreUrl: { type: String, required: true },
     contactEmail: { type: String, required: true },
   },
   { timestamps: true, minimize: false, optimisticConcurrency: true } as any,
@@ -186,7 +209,8 @@ function docToPojo(center: DataCenterDocument): DataCenter {
     organization: center.organization,
     contactEmail: center.contactEmail,
     storageType: center.storageType,
-    url: center.url,
+    songUrl: center.songUrl,
+    scoreUrl: center.scoreUrl,
     type: center.type,
   };
 }
