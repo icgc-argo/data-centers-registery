@@ -42,7 +42,7 @@ const App = (config: AppConfig): express.Express => {
       };
 
   const app = express();
-  app.set('port', process.env.PORT || 3000);
+  app.set('port', config.serverPort);
   app.use(bodyParser.json());
 
   app.get('/', (req, res) => res.status(200).send('Data Centers Registry'));

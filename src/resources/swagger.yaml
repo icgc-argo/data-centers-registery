@@ -222,13 +222,16 @@ components:
         organization: Acme
         storageType: S3
         name: Cancer Collaboratory Cloud
-        url: https://api.example.com
+        scoreUrl: https://song.example.com
+        songUrl: https://score.example.com
       properties:
         contactEmail:
           type: string
         storageType:
           type: string
-        url:
+        scoreUrl:
+          type: string
+        songUrl:
           type: string
         centerId:
           type: string
